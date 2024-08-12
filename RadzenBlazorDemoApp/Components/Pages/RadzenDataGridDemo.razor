@@ -1,0 +1,50 @@
+﻿@page "/data-grid"
+@using Bogus
+@using RadzenBlazorDemo.Data
+@using RadzenBlazorDemo.Models
+@rendermode RenderMode.InteractiveServer
+
+<h3>Radzen Data Grid</h3>
+
+<RadzenDataGrid 
+    AllowFiltering="true" 
+    AllowColumnResize="true" 
+    AllowAlternatingRows="false" 
+    FilterMode="FilterMode.Advanced" 
+    AllowSorting="true" 
+    PageSize="5" 
+    AllowPaging="true" 
+    PagerHorizontalAlign="HorizontalAlign.Left" 
+    ShowPagingSummary="true"
+    Data="@employees" 
+    ColumnWidth="300px" 
+    LogicalFilterOperator="LogicalFilterOperator.Or" 
+    SelectionMode="DataGridSelectionMode.Single">
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(Employee.Id)" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn Property="@nameof(Employee.FirstName)" Title="First Name" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(Employee.LastName)" Title="Last Name" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(Employee.Email)" Title="Job Title" Width="200px" />
+        <RadzenDataGridColumn Property="@nameof(Employee.PhoneNumber)" Title="Title" Width="120px" />
+        <RadzenDataGridColumn Property="@nameof(Employee.DateOfBirth)" Title="Birth Date" FormatString="{0:d}" Width="160px" />
+    </Columns>
+</RadzenDataGrid>
+
+
+@code {
+    List<Employee> employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var faker = new Faker<Employee>()
+            .RuleFor(e => e.Id, f => f.IndexFaker + 1)
+            .RuleFor(e => e.FirstName, f => f.Name.FirstName())
+            .RuleFor(e => e.LastName, f => f.Name.LastName())
+            .RuleFor(e => e.Email, f => f.Internet.Email())
+            .RuleFor(e => e.PhoneNumber, f => f.Phone.PhoneNumber())
+            .RuleFor(e => e.DateOfBirth, f => f.Date.Past(30, DateTime.Now.AddYears(-18)))
+            .RuleFor(e => e.Salary, f => f.Finance.Amount(30000, 120000));
+
+        employees = faker.Generate(50);
+    }
+}

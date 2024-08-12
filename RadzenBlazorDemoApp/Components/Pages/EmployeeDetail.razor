@@ -1,0 +1,54 @@
+﻿@page "/dialogcard/{EmployeeID}"
+@using Microsoft.EntityFrameworkCore
+@using RadzenBlazorDemo.Data
+@using RadzenBlazorDemo.Models
+
+@inject Radzen.DialogService dialogService
+@inject ApplicationDbContext _dbContext
+
+<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+    <RadzenStack>
+        <RadzenRow>
+            <RadzenColumn Size="12" SizeMD="6" class="rz-p-4 rz-border-radius-1" Style="border: var(--rz-grid-cell-border)">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                    <RadzenStack Gap="0" class="rz-text-truncate">
+                        <RadzenText TextStyle="TextStyle.Subtitle1">Basic information</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Firstname</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-text-truncate"><b>@(employee.FirstName + " " + employee?.LastName)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-mt-4 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">Lastname</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-text-truncate"><b>@employee.LastName</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-mt-4 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">DOB</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-text-truncate"><b>@employee.DateOfBirth.ToString("dd/MM/yyyy")</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-mt-4 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">Salary</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-text-truncate"><b>₹ @(string.Format("{0:#,##,##,##,##0}", employee.Salary))</b></RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" class="rz-p-4 rz-border-radius-1" Style="border: var(--rz-grid-cell-border)">
+                <RadzenStack Gap="0" class="rz-text-truncate">
+                    <RadzenText TextStyle="TextStyle.Subtitle1">Contact Details</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Overline" class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Email</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1" class="rz-text-truncate"><b>@employee.Email</b></RadzenText>
+                    <RadzenText TextStyle="TextStyle.Overline" class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Phone number</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1" class="rz-text-truncate"><b>@employee.PhoneNumber</b></RadzenText>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Click="@((args) => dialogService.Close(true))" Variant="Variant.Flat" Text="Close" Style="width: 120px" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter] public int EmployeeID { get; set; }
+
+    Employee employee;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        employee = await _dbContext.Employees.FindAsync(EmployeeID);
+    }
+}

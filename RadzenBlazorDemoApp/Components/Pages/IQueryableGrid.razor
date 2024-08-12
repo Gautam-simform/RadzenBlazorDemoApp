@@ -1,0 +1,85 @@
+﻿@page "/data-grid-db"
+
+@using RadzenBlazorDemo.Data
+@using RadzenBlazorDemo.Models
+
+@inject ApplicationDbContext _dbContext 
+@inject DialogService DialogService
+
+@rendermode RenderMode.InteractiveServer
+
+<h3>Data From DB</h3>
+
+<RadzenDataGrid 
+    AllowFiltering="true"
+    AllowVirtualization="true"
+    AllowColumnResize="true" 
+    AllowAlternatingRows="false"
+    AllowColumnPicking="true"
+    AllowColumnReorder="true"
+    FilterPopupRenderMode="PopupRenderMode.OnDemand" 
+    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" 
+    FilterMode="FilterMode.Advanced"
+    AllowGrouping="true" 
+    AllowSorting="true" 
+    PageSize="5" 
+    AllowPaging="true" 
+    PagerHorizontalAlign="HorizontalAlign.Left"
+    Data="@employees" 
+    TItem="Employee" 
+    ColumnWidth="300px" 
+    LogicalFilterOperator="LogicalFilterOperator.Or" 
+    ShowPagingSummary="true"
+    IsLoading=@isLoading 
+    Sort="@ShowLoading" 
+    Page="@ShowLoading" 
+    Group="@ShowLoading" 
+    Filter="@ShowLoading">
+    
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(Employee.Id)" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn Property="@nameof(Employee.FirstName)" Title="First Name" Frozen="true" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(Employee.LastName)" Title="Last Name" Width="160px" />
+        <RadzenDataGridColumn Property="@nameof(Employee.Email)" Title="Email" Width="200px" />
+        <RadzenDataGridColumn Property="@nameof(Employee.PhoneNumber)" Title="Phone Number" Width="120px" />
+        <RadzenDataGridColumn Property="@nameof(Employee.DateOfBirth)" Title="DOB" FormatString="{0:d}" Width="160px" />
+        
+        <RadzenDataGridColumn Width="160px" Property="EmployeeId" Title="Employee Details" Filterable="false" Sortable="false">
+            <Template Context="data">
+                <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="rz-m-1" Click=@(() => OpenOrder(data.Id)) Text="Detail" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IQueryable<Employee> employees;
+
+    bool isLoading = false;
+
+    async Task ShowLoading()
+    {
+        isLoading = true;
+
+        await Task.Yield();
+
+        isLoading = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await ShowLoading();
+
+        employees = _dbContext.Employees;
+    }
+
+    async Task OpenOrder(int employeeId)
+    {
+        await DialogService.OpenAsync<EmployeeDetail>($"Employee {employeeId}",
+              new Dictionary<string, object>() { { "EmployeeID", employeeId } },
+              new DialogOptions() { Width = "700px" });
+    }
+
+}
