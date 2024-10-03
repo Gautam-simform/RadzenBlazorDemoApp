@@ -1,0 +1,143 @@
+﻿@page "/create-employee"
+@using RadzenBlazorDemo.Data
+@using RadzenBlazorDemo.Models
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+
+@inject NavigationManager Navigation
+@inject ApplicationDbContext _context
+@inject NotificationService NotificationService
+
+<h3>Create Employee</h3>
+
+<RadzenTemplateForm Data="@employee" TItem="Employee" @ref="employeeForm" Submit="@OnSubmit">
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="12" SizeSM="6">
+            <RadzenStack>
+
+                <RadzenFormField Text="First Name" Variant="@variant">
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="@employee.FirstName" Name="FirstName" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="FirstName" Text="First Name is required" />
+                    </Helper>
+                </RadzenFormField>
+
+                <RadzenFormField Text="Last Name" Variant="@variant">
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="@employee.LastName" Name="LastName" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="LastName" Text="Last Name is required" />
+                    </Helper>
+                </RadzenFormField>
+
+                <RadzenFormField Text="Email" Variant="@variant">
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="@employee.Email" Name="Email" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="Email" Text="Email is required" />
+                        @* <RadzenRegularExpressionValidator Component="Email" Pattern="^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$" Text="Invalid email address" /> *@
+                    </Helper>
+                </RadzenFormField>
+
+                <RadzenFormField Text="Phone Number" Variant="@variant">
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="@employee.PhoneNumber" Name="PhoneNumber" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="PhoneNumber" Text="Phone number is required" />
+                        <RadzenRegularExpressionValidator Component="PhoneNumber" Pattern="^\d{10}$" Text="Enter a valid phone number" />
+                    </Helper>
+                </RadzenFormField>
+
+                <RadzenFormField Text="Date of Birth" Variant="@variant">
+                    <ChildContent>
+                        <RadzenDatePicker @bind-Value="@employee.DateOfBirth" Name="DateOfBirth" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="DateOfBirth" Text="Date of Birth is required" />
+                    </Helper>
+                </RadzenFormField>
+
+                <RadzenFormField Text="Salary" Variant="@variant">
+                    <ChildContent>
+                        <RadzenNumeric @bind-Value="@employee.Salary" Name="Salary" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="Salary" Text="Salary is required" />
+                    </Helper>
+                </RadzenFormField>
+
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow>
+        <RadzenColumn Size="12">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Submit" Style="margin-top: 20px;" />
+            <RadzenButton Text="Reset" Click="@ResetForm" Style="margin-top: 20px;" />
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenTemplateForm>
+
+@code {
+    Variant variant = Variant.Outlined;
+
+    public class Employee
+    {
+        [Required(ErrorMessage = "First name is required")]
+        public string FirstName { get; set; }
+
+        [Required(ErrorMessage = "Last name is required")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Phone number is required")]
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "Enter a valid phone number")]
+        public string PhoneNumber { get; set; }
+
+        [Required(ErrorMessage = "Date of birth is required")]
+        public DateTime DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "Salary is required")]
+        public decimal Salary { get; set; }
+    }
+
+    Employee employee = new Employee();
+
+    RadzenTemplateForm<Employee> employeeForm;
+
+    void OnSubmit()
+    {
+        if (employeeForm.IsValid)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Form Submitted",
+                    Detail = JsonSerializer.Serialize(employee, new JsonSerializerOptions { WriteIndented = true })
+                });
+        }
+        else
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Validation Failed",
+                    Detail = "Please correct the form errors and try again."
+                });
+        }
+    }
+
+    void ResetForm()
+    {
+        employee = new Employee();
+        employeeForm.EditContext = new Microsoft.AspNetCore.Components.Forms.EditContext(employee);
+    }
+}
